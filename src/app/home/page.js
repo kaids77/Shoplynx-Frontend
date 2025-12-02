@@ -20,7 +20,7 @@ export default async function Home() {
 
     return (
         <>
-            <div className="hero-section">
+            <div className="hero-white">
                 <div className="container hero-content">
                     <h1>New Arrivals</h1>
                     <p>Check out our latest collection.</p>

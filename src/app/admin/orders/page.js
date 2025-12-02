@@ -75,8 +75,8 @@ export default function AdminOrders() {
                             <tr key={order.id}>
                                 <td>#{order.id}</td>
                                 <td>
-                                    <strong>{order.customer_name}</strong><br />
-                                    <small>{order.customer_email}</small>
+                                    <strong>{order.customer_details?.name || 'N/A'}</strong><br />
+                                    <small>{order.customer_details?.email || 'N/A'}</small>
                                 </td>
                                 <td>
                                     {order.items && order.items.map((item, idx) => (

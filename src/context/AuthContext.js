@@ -60,9 +60,9 @@ export const AuthProvider = ({ children }) => {
                 localStorage.setItem('token', data.access_token);
                 setUser(data.user);
                 if (data.user.email === 'admin@shoplynx.com') {
-                    window.location.href = '/admin';
+                    router.push('/admin');
                 } else {
-                    window.location.href = '/home';
+                    router.push('/home');
                 }
                 return { success: true };
             } else {

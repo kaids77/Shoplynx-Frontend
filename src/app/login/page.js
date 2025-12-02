@@ -1,14 +1,27 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 export default function LoginPage() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
-    const { login } = useAuth();
+    const { login, user, loading } = useAuth();
+    const router = useRouter();
+
+    // Redirect if already authenticated
+    useEffect(() => {
+        if (!loading && user) {
+            if (user.email === 'admin@shoplynx.com') {
+                router.push('/admin');
+            } else {
+                router.push('/home');
+            }
+        }
+    }, [user, loading, router]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -18,6 +31,17 @@ export default function LoginPage() {
             setError(res.message);
         }
     };
+
+    // Show loading while checking authentication
+    if (loading) {
+        return (
+            <div className="auth-container">
+                <div className="auth-card">
+                    <p>Loading...</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="auth-container">

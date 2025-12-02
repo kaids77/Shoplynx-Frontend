@@ -34,7 +34,7 @@ export default async function ProductPage({ params }) {
             <div className="product-detail-container">
                 <div className="product-detail-image-wrapper">
                     {product.image_path ? (
-                        <img src={`/images/${product.image_path}`} alt={product.name} className="product-detail-image" />
+                        <img src={`http://localhost:8000/images/${product.image_path}`} alt={product.name} className="product-detail-image" />
                     ) : (
                         <div className="product-detail-image" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f0f0f0' }}>
                             No Image

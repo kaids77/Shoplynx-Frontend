@@ -4,7 +4,7 @@ import { useCart } from '../../context/CartContext';
 import Link from 'next/link';
 
 export default function CartPage() {
-    const { cartItems, removeFromCart, clearCart } = useCart();
+    const { cartItems, updateQuantity, removeFromCart, clearCart } = useCart();
 
     const total = cartItems.reduce((sum, item) => {
         // Ensure product exists and has price
@@ -34,14 +34,46 @@ export default function CartPage() {
                                 <tr key={item.id}>
                                     <td>
                                         <div className="d-flex align-items-center">
-                                            {item.product && item.product.image_path && (
-                                                <img src={`/images/${item.product.image_path}`} alt={item.product.name} style={{ width: '50px', height: '50px', objectFit: 'cover', marginRight: '1rem' }} />
+                                            {item.product && item.product.image_path ? (
+                                                <img src={`http://localhost:8000/images/${item.product.image_path}`} alt={item.product.name} style={{ width: '50px', height: '50px', objectFit: 'cover', marginRight: '1rem' }} />
+                                            ) : (
+                                                <div style={{ width: '50px', height: '50px', background: '#ddd', marginRight: '1rem' }}></div>
                                             )}
-                                            {item.product ? item.product.name : 'Unknown Product'}
+                                            <div>
+                                                <h4 style={{ margin: 0, fontSize: '1rem' }}>{item.product ? item.product.name : 'Unknown Product'}</h4>
+                                                {item.product && (
+                                                    <>
+                                                        <p className="text-muted" style={{ fontSize: '0.9rem', margin: 0 }}>Stock: {item.product.stock}</p>
+                                                        {item.product.stock < item.quantity && (
+                                                            <p className="text-danger" style={{ fontSize: '0.8rem', margin: 0 }}>Only {item.product.stock} available!</p>
+                                                        )}
+                                                        {item.product.stock >= item.quantity && item.product.stock < 5 && (
+                                                            <p className="text-warning" style={{ fontSize: '0.8rem', margin: 0 }}>Low Stock!</p>
+                                                        )}
+                                                    </>
+                                                )}
+                                            </div>
                                         </div>
                                     </td>
                                     <td>₱{item.product ? parseFloat(item.product.price).toFixed(2) : '0.00'}</td>
-                                    <td>{item.quantity}</td>
+                                    <td>
+                                        <div className="d-flex align-items-center">
+                                            <button
+                                                className="btn btn-sm btn-outline-secondary"
+                                                onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
+                                                disabled={item.quantity <= 1}
+                                            >
+                                                -
+                                            </button>
+                                            <span className="mx-2">{item.quantity}</span>
+                                            <button
+                                                className="btn btn-sm btn-outline-secondary"
+                                                onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
+                                            >
+                                                +
+                                            </button>
+                                        </div>
+                                    </td>
                                     <td>₱{item.product ? (parseFloat(item.product.price) * item.quantity).toFixed(2) : '0.00'}</td>
                                     <td>
                                         <button onClick={() => removeFromCart(item.id)} className="btn btn-danger btn-sm">Remove</button>
@@ -53,6 +85,7 @@ export default function CartPage() {
                     <div className="cart-summary mt-4 text-right">
                         <h3>Total: ₱{total.toFixed(2)}</h3>
                         <div className="mt-3" style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
+                            <Link href="/products" className="btn btn-outline">Continue Shopping</Link>
                             <button onClick={clearCart} className="btn btn-outline">Clear Cart</button>
                             <Link href="/checkout" className="btn btn-primary">Proceed to Checkout</Link>
                         </div>

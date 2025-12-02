@@ -3,9 +3,11 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 export default function AdminDashboard() {
-    const { user } = useAuth();
+    const { user, loading: authLoading } = useAuth();
+    const router = useRouter();
     const [stats, setStats] = useState({
         totalProducts: 0,
         totalOrders: 0,
@@ -15,8 +17,13 @@ export default function AdminDashboard() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        if (authLoading) return;
+        if (!user || user.email !== 'admin@shoplynx.com') {
+            router.push('/login');
+            return;
+        }
         fetchDashboardData();
-    }, []);
+    }, [user, authLoading]);
 
     const fetchDashboardData = async () => {
         try {
@@ -58,7 +65,7 @@ export default function AdminDashboard() {
         }
     };
 
-    if (loading) {
+    if (loading || authLoading) {
         return <div className="container mt-5"><p>Loading...</p></div>;
     }
 
@@ -101,9 +108,9 @@ export default function AdminDashboard() {
                                     <tr key={order.id}>
                                         <td>#{order.id}</td>
                                         <td>
-                                            <strong>{order.customer_name}</strong><br />
-                                            <small>{order.customer_email}</small><br />
-                                            <small>{order.customer_phone}</small>
+                                            <strong>{order.customer_details?.name || 'N/A'}</strong><br />
+                                            <small>{order.customer_details?.email || 'N/A'}</small><br />
+                                            <small>{order.customer_details?.phone || 'N/A'}</small>
                                         </td>
                                         <td>
                                             {order.items && order.items.map((item, idx) => (
