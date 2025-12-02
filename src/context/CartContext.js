@@ -40,10 +40,54 @@ export const CartProvider = ({ children }) => {
     const addToCart = async (productId, quantity = 1) => {
         const token = localStorage.getItem('token');
         if (!token) {
-            // Redirect to login or show message
-            alert('Please login to add to cart');
+            window.dispatchEvent(new CustomEvent('show-notification', {
+                detail: { type: 'error', message: 'Please login to add to cart' }
+            }));
             return;
         }
+
+        try {
+            const body = { product_id: productId };
+            // Only include quantity if explicitly provided (for cart page updates)
+            if (quantity > 1) {
+                body.quantity = quantity;
+            }
+
+            const res = await fetch('http://localhost:8000/api/cart', {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(body)
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+                fetchCart();
+                window.dispatchEvent(new CustomEvent('show-notification', {
+                    detail: { type: 'success', message: 'Added to cart!' }
+                }));
+            } else {
+                const errorMessage = data.error || 'Failed to add to cart';
+                window.dispatchEvent(new CustomEvent('show-notification', {
+                    detail: { type: 'error', message: errorMessage }
+                }));
+            }
+        } catch (error) {
+            console.error(error);
+            window.dispatchEvent(new CustomEvent('show-notification', {
+                detail: { type: 'error', message: 'An error occurred' }
+            }));
+        }
+    };
+
+    const updateQuantity = async (productId, quantity) => {
+        if (quantity < 1) return;
+        const token = localStorage.getItem('token');
+        if (!token) return;
 
         try {
             const res = await fetch('http://localhost:8000/api/cart', {
@@ -58,9 +102,6 @@ export const CartProvider = ({ children }) => {
 
             if (res.ok) {
                 fetchCart();
-                alert('Added to cart!');
-            } else {
-                alert('Failed to add to cart');
             }
         } catch (error) {
             console.error(error);
@@ -110,7 +151,7 @@ export const CartProvider = ({ children }) => {
     };
 
     return (
-        <CartContext.Provider value={{ cartItems, addToCart, removeFromCart, clearCart }}>
+        <CartContext.Provider value={{ cartItems, addToCart, updateQuantity, removeFromCart, clearCart }}>
             {children}
         </CartContext.Provider>
     );
